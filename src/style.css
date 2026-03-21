@@ -1,0 +1,41 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-term-bg: var(--term-bg);
+  --color-term-surface: var(--term-surface);
+  --color-term-border: var(--term-border);
+  --color-term-text: var(--term-text);
+  --color-term-muted: var(--term-muted);
+  --color-term-secondary: var(--term-secondary);
+  --color-term-prompt: var(--term-accent);
+  --color-term-success: var(--term-success);
+  --color-term-warning: var(--term-warning);
+  --color-term-error: var(--term-error);
+}
+
+:root {
+  /* Light Theme (Accessible Dev Light) */
+  --term-bg: #f5f7fb;
+  --term-surface: #ffffff;
+  --term-border: #cbd5e1;
+  --term-text: #000000;
+  --term-muted: #475569;
+  --term-secondary: #475569;
+  --term-accent: #2563eb;
+  --term-success: #16a34a;
+  --term-warning: #b45309;
+  --term-error: #dc2626;
+}
+
+html,
+body {
+  background-color: var(--term-bg);
+  background-image: url('./assets/bg.png');
+  background-size: cover;
+  background-position: top left;
+  overflow-x: hidden;
+  font-family:
+    'Roboto Mono',
+    ui-monospace,
+    monospace;
+}
