@@ -1,0 +1,28 @@
+[
+  { "type": "text", "content": "Get in touch:" },
+  {
+    "type": "link",
+    "content": {
+      "label": "LinkedIn",
+      "href": "https://linkedin.com/in/stefanperez",
+      "display": "linkedin.com/in/stefanperez"
+    }
+  },
+  {
+    "type": "link",
+    "content": {
+      "label": "GitHub",
+      "href": "https://github.com/stefanperez",
+      "display": "github.com/stefanperez"
+    }
+  },
+  {
+    "type": "link",
+    "content": {
+      "label": "Email",
+      "href": "mailto:development@stefanperez.nl",
+      "display": "development@stefanperez.nl"
+    }
+  }
+]
+

@@ -1,6 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import avatarImage from '../../assets/avatar.png'
-import { profileContent } from '../../content/profile'
+import profileContent from '../../content/profile.json'
 </script>
 
 <template>

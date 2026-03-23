@@ -1,6 +1,6 @@
 import { ref, nextTick } from 'vue'
 import { TYPING_SPEED_READY } from '../constants/terminalBehavior'
-import { terminalContent } from '../content/terminal'
+import terminalContent from '../content/terminal.json'
 
 /**
  * Initial boot sequence and hint. Uses addLine, typeLine, outputLines from useTerminalOutput.

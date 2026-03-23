@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useTerminal } from '../composables/useTerminal'
-import { terminalContent } from '../content/terminal'
+import terminalContent from '../content/terminal.json'
 import TerminalTitleBar from './terminal/TerminalTitleBar.vue'
 import TerminalOutput from './terminal/TerminalOutput.vue'
 import TerminalInputLine from './terminal/TerminalInputLine.vue'
@@ -18,48 +18,42 @@ const {
 } = useTerminal()
 
 const isInputFocused = ref(false)
-const isMobile = ref(false)
+const isMobileDevice = ref(false)
 
-function updateIsMobile() {
-  if (typeof window === 'undefined') return
-  const mq = window.matchMedia?.('(max-width: 768px), (pointer: coarse)')
-  isMobile.value = Boolean(mq?.matches)
+const mobileMediaQuery = '(max-width: 768px), (pointer: coarse)'
+let mobileViewportQueryList: MediaQueryList | null = null
+
+function syncMobileState() {
+  isMobileDevice.value = Boolean(
+    mobileViewportQueryList?.matches ?? window.matchMedia?.(mobileMediaQuery).matches
+  )
 }
 
-let mq: MediaQueryList | null = null
-
-onMounted(() => {
-  updateIsMobile()
-  mq = window.matchMedia?.('(max-width: 768px), (pointer: coarse)') ?? null
-  if (!mq) return
-  const handler = () => updateIsMobile()
-  mq.addEventListener?.('change', handler)
-  // Safari <14 fallback
-  mq.addListener?.(handler as any)
-})
-
-onUnmounted(() => {
-  if (!mq) return
-  const handler = () => updateIsMobile()
-  mq.removeEventListener?.('change', handler)
-  mq.removeListener?.(handler as any)
-  mq = null
-})
+function handleMobileViewportChange() {
+  syncMobileState()
+}
 
 function onInputFocus() {
   isInputFocused.value = true
 }
 
-function onInputBlur() {
-  isInputFocused.value = false
-}
+onMounted(() => {
+  mobileViewportQueryList = window.matchMedia?.(mobileMediaQuery) ?? null
+  syncMobileState()
+
+  if (!mobileViewportQueryList) return
+  mobileViewportQueryList.addEventListener?.('change', handleMobileViewportChange)
+})
+
+onUnmounted(() => {
+  if (!mobileViewportQueryList) return
+  mobileViewportQueryList.removeEventListener?.('change', handleMobileViewportChange)
+  mobileViewportQueryList = null
+})
 </script>
 
 <template>
-  <div
-    class="relative z-10 min-h-screen flex flex-col text-sm md:text-base overflow-x-hidden min-w-0"
-    role="application"
-    aria-label="Terminal">
+  <div class="relative z-10 min-h-screen flex flex-col text-sm md:text-base overflow-x-hidden min-w-0">
     <div class="flex-1 flex px-4 pt-10 pb-24 min-w-0 items-center justify-center">
       <div
         ref="terminalRef"
@@ -71,14 +65,13 @@ function onInputBlur() {
           :get-rendered-content="getRenderedContent"
           :prompt="PROMPT"/>
         <TerminalInputLine
-          v-if="!isMobile"
+          v-if="!isMobileDevice"
           ref="inputLineRef"
           v-model="inputValue"
           :prompt="PROMPT"
           @submit="onSubmit"
           @key="onKey"
-          @focus="onInputFocus"
-          @blur="onInputBlur" />
+          @focus="onInputFocus" />
         <TerminalCommandBar
           v-else
           :commands="[...terminalContent.mobile.commands]"

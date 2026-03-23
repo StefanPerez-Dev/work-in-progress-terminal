@@ -1,0 +1,19 @@
+[
+  { "type": "error", "content": "npm ERR! code E404" },
+  { "type": "error", "content": "npm ERR! package stefan.perez not found" },
+  { "type": "text", "content": "" },
+  { "type": "text", "content": "This portfolio hasn't been published yet." },
+  { "type": "text", "content": "" },
+  { "type": "text", "content": "Progress:" },
+  {
+    "type": "progress",
+    "content": { "percent": 70, "width": 18 },
+    "options": { "done": true, "visibleLength": 1000000, "delayAfterMs": 980 }
+  },
+  { "type": "text", "content": "" },
+  { "type": "text", "content": "Current tasks:" },
+  { "type": "text", "content": "• polishing UI\n• fixing bugs\n• preparing release" },
+  { "type": "text", "content": "" },
+  { "type": "text", "content": "Try \"contact\" to get in touch." }
+]
+

@@ -1,25 +1,52 @@
 import { ref, onMounted, nextTick } from 'vue'
-import { terminalContent } from '../content/terminal'
+import terminalContent from '../content/terminal.json'
 import { useReducedMotion } from './useReducedMotion'
 import { useTerminalOutput } from './useTerminalOutput'
 import { useTerminalCommands } from './useTerminalCommands'
 import { useTerminalInput } from './useTerminalInput'
 import { useTerminalInit } from './useTerminalInit'
 
+type HelpItemContent = {
+  selected: boolean
+  [key: string]: unknown
+}
+
+type HelpItemLine = {
+  type: 'help-item'
+  content: HelpItemContent
+}
+
+function isHelpItemLine(line: unknown): line is HelpItemLine {
+  return Boolean(
+    line &&
+      typeof line === 'object' &&
+      'type' in line &&
+      'content' in line &&
+      (line as { type?: unknown }).type === 'help-item'
+  )
+}
+
 /**
- * Single composable that wires all terminal composables and returns
- * everything the Terminal component needs. Call boot() in onMounted.
+ * Wires all terminal composables together and exposes the state
+ * and actions needed by the Terminal component.
  */
 export function useTerminal() {
-  const outputEl = ref(null)
-  const terminalRef = ref(null)
+  const outputEl = ref<HTMLElement | null>(null)
+  const terminalRef = ref<HTMLElement | null>(null)
   const isBooting = ref(true)
   const queuedCommands = ref<string[]>([])
   const helpSelectionIndex = ref<number | null>(null)
 
   const { reducedMotion, detectReducedMotion } = useReducedMotion()
-  const { outputLines, addLine, typeLine, getRenderedContent, scrollToBottom, clearOutput } =
-    useTerminalOutput(reducedMotion, outputEl)
+
+  const {
+    outputLines,
+    addLine,
+    typeLine,
+    getRenderedContent,
+    scrollToBottom,
+    clearOutput,
+  } = useTerminalOutput(reducedMotion, outputEl)
 
   const { runCommand } = useTerminalCommands({
     addLine,
@@ -29,23 +56,7 @@ export function useTerminal() {
     nextTick,
   })
 
-  function runCommandWhenReady(cmd: string) {
-    // any new command clears existing help selection
-    helpSelectionIndex.value = null
-    outputLines.value.forEach(line => {
-      if (line.type === 'help-item' && (line as any).content) {
-        ;(line as any).content.selected = false
-      }
-    })
-
-    if (isBooting.value) {
-      queuedCommands.value.push(cmd)
-      return
-    }
-    runCommand(cmd)
-  }
-
-  const { inputValue, inputLineRef, focusInput, onSubmit } = useTerminalInput(runCommandWhenReady)
+  const { inputValue, inputLineRef, focusInput, onSubmit } = useTerminalInput(runCommandOrQueue)
 
   const { runInitSequence } = useTerminalInit({
     addLine,
@@ -55,61 +66,91 @@ export function useTerminal() {
     nextTick,
   })
 
-  function onKey(event: KeyboardEvent) {
-    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return
-    const items = outputLines.value.filter(line => line.type === 'help-item')
-    if (!items.length) return
+  function getHelpItems() {
+    return outputLines.value.filter(isHelpItemLine)
+  }
 
-    event.preventDefault()
-
-    const max = items.length - 1
-    if (helpSelectionIndex.value == null) {
-      helpSelectionIndex.value = 0
-    } else if (event.key === 'ArrowDown') {
-      helpSelectionIndex.value =
-        helpSelectionIndex.value >= max ? 0 : helpSelectionIndex.value + 1
-    } else if (event.key === 'ArrowUp') {
-      helpSelectionIndex.value =
-        helpSelectionIndex.value <= 0 ? max : helpSelectionIndex.value - 1
-    }
-
-    items.forEach((line, index) => {
-      if (!(line as any).content) return
-      ;(line as any).content.selected = index === helpSelectionIndex.value
+  function clearHelpSelection() {
+    helpSelectionIndex.value = null
+    getHelpItems().forEach(item => {
+      item.content.selected = false
     })
   }
 
-  async function boot() {
+  function syncHelpSelection() {
+    const helpItems = getHelpItems()
+
+    helpItems.forEach((item, index) => {
+      item.content.selected = index === helpSelectionIndex.value
+    })
+  }
+
+  function runCommandOrQueue(command: string) {
+    clearHelpSelection()
+
+    if (isBooting.value) {
+      queuedCommands.value.push(command)
+      return
+    }
+
+    runCommand(command)
+  }
+
+  function moveHelpSelection(direction: 'up' | 'down') {
+    const helpItems = getHelpItems()
+    if (!helpItems.length) return
+
+    const lastIndex = helpItems.length - 1
+
+    if (helpSelectionIndex.value == null) {
+      helpSelectionIndex.value = 0
+    } else if (direction === 'down') {
+      helpSelectionIndex.value =
+        helpSelectionIndex.value >= lastIndex ? 0 : helpSelectionIndex.value + 1
+    } else {
+      helpSelectionIndex.value =
+        helpSelectionIndex.value <= 0 ? lastIndex : helpSelectionIndex.value - 1
+    }
+
+    syncHelpSelection()
+  }
+
+  function onKey(event: KeyboardEvent) {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return
+    if (!getHelpItems().length) return
+
+    event.preventDefault()
+    moveHelpSelection(event.key === 'ArrowDown' ? 'down' : 'up')
+  }
+
+  async function initializeTerminal() {
     detectReducedMotion()
     await runInitSequence(detectReducedMotion)
+
     isBooting.value = false
 
     if (queuedCommands.value.length) {
-      // drain queue in order once init finishes
-      const toRun = queuedCommands.value.slice()
+      const queuedCommandsToRun = queuedCommands.value.slice()
       queuedCommands.value = []
-      toRun.forEach(c => runCommand(c))
+      queuedCommandsToRun.forEach(runCommandOrQueue)
     }
+
     focusInput()
   }
 
-  onMounted(boot)
+  onMounted(initializeTerminal)
 
   return {
-    // Refs for template bindings
     outputEl,
     terminalRef,
     inputLineRef,
-    // State
     inputValue,
     outputLines,
     getRenderedContent,
-    // Actions
     onSubmit,
     onKey,
     focusInput,
-    runCommand: runCommandWhenReady,
-    // Constants
+    runCommand: runCommandOrQueue,
     PROMPT: terminalContent.prompt,
   }
 }

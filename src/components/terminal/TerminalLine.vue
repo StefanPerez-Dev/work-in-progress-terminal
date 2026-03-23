@@ -1,28 +1,14 @@
-<script setup>
+<script setup lang="ts">
+import TerminalProgressLine from './lines/TerminalProgressLine.vue'
+import TerminalStatusLine from './lines/TerminalStatusLine.vue'
+import TerminalHelpItemLine from './lines/TerminalHelpItemLine.vue'
+import TerminalLinkLine from './lines/TerminalLinkLine.vue'
+
 defineProps({
   line: { type: Object, required: true },
   getRenderedContent: { type: Function, required: true },
   prompt: { type: String, required: true },
 })
-
-function formatHelpLabel(label) {
-  const raw = String(label ?? '')
-  const padded = raw.padEnd(12, ' ')
-  return padded
-}
-
-function renderedText(getRenderedContent, line) {
-  try {
-    return String(getRenderedContent(line).join(''))
-  } catch {
-    return ''
-  }
-}
-
-function startsWithStatusIcon(text, icons) {
-  const t = String(text ?? '').trimStart()
-  return icons.some(icon => t.startsWith(icon))
-}
 
 function splitPrefix(text) {
   const s = String(text ?? '')
@@ -46,23 +32,7 @@ function splitPrefix(text) {
   <div v-else-if="line.type === 'section'" class="terminal-line flex flex-wrap items-baseline gap-x-1">
     <span class="text-term-text font-semibold whitespace-pre">{{ getRenderedContent(line).join('') }}</span>
   </div>
-  <div v-else-if="line.type === 'progress'" class="terminal-line flex flex-wrap items-baseline gap-x-1 whitespace-pre">
-    <span class="text-term-text whitespace-pre">[</span>
-    <span
-      class="progressbar"
-      :style="{
-        '--progress-scale': Math.max(0, Math.min(1, (line.content?.percent ?? 0) / 100)),
-        '--progress-steps': Math.max(1, Number(line.content?.width ?? 18)),
-      }"
-      role="img"
-      :aria-label="`Progress ${line.content?.percent ?? 0}%`"
-    >
-      <span class="progressbar-base" aria-hidden="true">{{ '░'.repeat(Number(line.content?.width ?? 18)) }}</span>
-      <span class="progressbar-fill" aria-hidden="true">{{ '█'.repeat(Number(line.content?.width ?? 18)) }}</span>
-    </span>
-    <span class="text-term-text whitespace-pre">]</span>
-    <span class="text-term-text whitespace-pre"> {{ line.content?.percent ?? 0 }}%</span>
-  </div>
+  <TerminalProgressLine v-else-if="line.type === 'progress'" :line="line" />
   <div v-else-if="line.type === 'about-tree'" class="terminal-line whitespace-pre-wrap">
     <div
       v-for="(treeLine, idx) in line.content?.lines ?? []"
@@ -94,39 +64,11 @@ function splitPrefix(text) {
     </span>
     <span class="sr-only">Loading</span>
   </div>
-  <div
-    v-else-if="line.type === 'success'"
-    class="terminal-line flex flex-wrap items-baseline gap-x-1 my-6">
-    <span
-      v-if="!startsWithStatusIcon(renderedText(getRenderedContent, line), ['✓', '✔'])"
-      class="text-term-success whitespace-pre"
-      aria-hidden="true"
-      >✓</span
-    >
-    <span class="text-term-success whitespace-pre">{{ getRenderedContent(line).join('') }}</span>
-  </div>
-  <div
-    v-else-if="line.type === 'error'"
-    class="terminal-line flex flex-wrap items-baseline gap-x-1">
-    <span
-      v-if="!startsWithStatusIcon(renderedText(getRenderedContent, line), ['×', '✕', '✗'])"
-      class="text-term-error whitespace-pre"
-      aria-hidden="true"
-      >×</span
-    >
-    <span class="text-term-error whitespace-pre">{{ getRenderedContent(line).join('') }}</span>
-  </div>
-  <div
-    v-else-if="line.type === 'warning'"
-    class="terminal-line flex flex-wrap items-baseline gap-x-1">
-    <span
-      v-if="!startsWithStatusIcon(renderedText(getRenderedContent, line), ['!', '⚠'])"
-      class="text-term-warning whitespace-pre"
-      aria-hidden="true"
-      >!</span
-    >
-    <span class="text-term-warning whitespace-pre">{{ getRenderedContent(line).join('') }}</span>
-  </div>
+  <TerminalStatusLine
+    v-else-if="line.type === 'success' || line.type === 'error' || line.type === 'warning'"
+    :line="line"
+    :get-rendered-content="getRenderedContent"
+  />
   <div
     v-else-if="line.type === 'muted'"
     class="terminal-line flex flex-wrap items-baseline gap-x-1">
@@ -152,27 +94,8 @@ function splitPrefix(text) {
       splitPrefix(getRenderedContent(line).join('')).rest
     }}</span>
   </div>
-  <div
-    v-else-if="line.type === 'help-item'"
-    class="terminal-line grid grid-cols-[14ch_1fr] items-baseline">
-    <span
-      class="whitespace-pre font-semibold"
-      :class="line.content.selected ? 'text-term-text underline' : 'text-term-text'"
-      >{{ line.content.label }}</span
-    >
-    <span class="text-term-muted whitespace-pre">{{ line.content.description }}</span>
-  </div>
-  <div v-else-if="line.type === 'link'" class="terminal-line grid grid-cols-[10ch_auto_1fr] gap-x-2">
-    <span class="text-term-text whitespace-pre truncate">{{ line.content.label }}</span>
-    <span class="text-term-text whitespace-pre" aria-hidden="true">→</span>
-    <a
-      :href="line.content.href"
-      :target="String(line.content.href || '').startsWith('mailto:') ? undefined : '_blank'"
-      :rel="String(line.content.href || '').startsWith('mailto:') ? undefined : 'noopener noreferrer'"
-      class="text-term-prompt/90 hover:text-term-prompt hover:underline focus:ring-2 focus:ring-term-prompt focus:ring-offset-2 focus:ring-offset-term-surface rounded outline-none whitespace-pre truncate"
-      >{{ line.content.display ?? line.content.href }}</a
-    >
-  </div>
+  <TerminalHelpItemLine v-else-if="line.type === 'help-item'" :line="line" />
+  <TerminalLinkLine v-else-if="line.type === 'link'" :line="line" />
   <div v-else class="terminal-line flex flex-wrap items-baseline gap-x-1">
     <span class="text-term-text whitespace-pre">{{ getRenderedContent(line).join('') }}</span>
   </div>
@@ -201,31 +124,6 @@ function splitPrefix(text) {
   }
   to {
     opacity: 1;
-  }
-}
-
-.progressbar {
-  position: relative;
-  display: inline-block;
-  line-height: 1;
-}
-
-.progressbar-base {
-  color: color-mix(in srgb, var(--term-muted) 70%, transparent);
-}
-
-.progressbar-fill {
-  position: absolute;
-  inset: 0;
-  color: var(--term-success);
-  transform-origin: left center;
-  transform: scaleX(0);
-  animation: progress-fill 900ms steps(var(--progress-steps)) forwards;
-}
-
-@keyframes progress-fill {
-  to {
-    transform: scaleX(var(--progress-scale));
   }
 }
 

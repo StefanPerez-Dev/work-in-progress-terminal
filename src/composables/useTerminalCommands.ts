@@ -1,6 +1,9 @@
 import { normalizeCommand, isNpmInstall } from '../utils/terminalCommands'
-import { contactContent } from '../content/contact'
-import { terminalContent } from '../content/terminal'
+import terminalContent from '../content/terminal.json'
+import helpOutput from '../data/terminal-outputs/help.json'
+import installOutput from '../data/terminal-outputs/install.json'
+import contactOutput from '../data/terminal-outputs/contact.json'
+import aboutOutput from '../data/terminal-outputs/about.json'
 
 /**
  * Run a terminal command and append lines via addLine.
@@ -11,7 +14,12 @@ export function useTerminalCommands(deps) {
   const { addLine, outputLines, clearOutput, scrollToBottom, nextTick } = deps
   let commandQueue = Promise.resolve()
   const LINE_STAGGER_MS = 60
-  const PROGRESS_ANIMATION_WAIT_MS = 980
+
+  type CommandOutputLine = {
+    type: string
+    content: any
+    options?: Record<string, any>
+  }
 
   function instant(type, content, options = {}) {
     return addLine(type, content, { done: true, visibleLength: 1e6, ...options })
@@ -26,7 +34,7 @@ export function useTerminalCommands(deps) {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 
-  async function pushLine(type, content, options = {}) {
+  async function pushLine(type, content, options: Record<string, any> = {}) {
     instant(type, content, options)
     await waitTick()
     // Force immediate scroll; smooth can lag once output becomes scrollable.
@@ -44,6 +52,13 @@ export function useTerminalCommands(deps) {
     for (const line of lines) {
       await pushLine(line.type, line.content, line.options ?? {})
     }
+  }
+
+  function cloneLines(lines: CommandOutputLine[]): CommandOutputLine[] {
+    if (typeof structuredClone === 'function') {
+      return structuredClone(lines)
+    }
+    return JSON.parse(JSON.stringify(lines))
   }
 
   function done() {
@@ -82,69 +97,33 @@ export function useTerminalCommands(deps) {
       return
     }
 
-    if (raw === 'help') {
-      await pushLine('section', terminalContent.help.heading)
-      await pushLine('text', '')
-      await pushLines(
-        terminalContent.help.items.map(item => ({
-          type: 'help-item',
-          content: {
-          label: item.label,
-          command: item.label,
-          description: item.description,
-          selected: false,
-          },
-        }))
-      )
+    const n = normalizeCommand(raw)
+    let lines: CommandOutputLine[] = []
+
+    if (n === 'help') {
+      lines = cloneLines(helpOutput as CommandOutputLine[])
+      await pushLines(lines)
       done()
       return
     }
 
-    const n = normalizeCommand(raw)
-
     if (isNpmInstall(raw) || n === 'install') {
-      await pushLines([
-        { type: 'error', content: terminalContent.install.npm404Code },
-        { type: 'error', content: terminalContent.install.npmNotFound },
-        { type: 'text', content: '' },
-        { type: 'text', content: terminalContent.install.notPublished },
-        { type: 'text', content: '' },
-        { type: 'text', content: terminalContent.install.progressHeading },
-        {
-          type: 'progress',
-          content: {
-          percent: terminalContent.install.progressPercent,
-          width: terminalContent.install.progressWidth,
-          },
-          options: {
-            done: true,
-            visibleLength: 1e6,
-            delayAfterMs: PROGRESS_ANIMATION_WAIT_MS,
-          },
-        },
-        { type: 'text', content: '' },
-        { type: 'text', content: terminalContent.install.tasksHeading },
-        { type: 'text', content: terminalContent.install.tasks.join('\n') },
-        { type: 'text', content: '' },
-        { type: 'text', content: terminalContent.install.contactNudge },
-      ])
+      lines = cloneLines(installOutput as CommandOutputLine[])
+      await pushLines(lines)
       done()
       return
     }
 
     if (n === 'contact') {
-      await pushLine('text', contactContent.heading)
-      await pushLines(contactContent.links.map(link => ({ type: 'link', content: link })))
+      lines = cloneLines(contactOutput as CommandOutputLine[])
+      await pushLines(lines)
       done()
       return
     }
 
     if (n === 'about') {
-      await pushLine('about-tree', {
-        lines: terminalContent.about.tree.split('\n'),
-        linkText: 'package.json',
-        href: terminalContent.about.resumeHref,
-      })
+      lines = cloneLines(aboutOutput as CommandOutputLine[])
+      await pushLines(lines)
       done()
       return
     }
@@ -155,8 +134,11 @@ export function useTerminalCommands(deps) {
       return
     }
 
-    await pushLine('error', `command not found: ${raw}`)
-    await pushLine('muted', terminalContent.init.tipDesktop)
+    lines = [
+      { type: 'error', content: `command not found: ${raw}` },
+      { type: 'muted', content: terminalContent.init.tipDesktop },
+    ]
+    await pushLines(lines)
     done()
   }
 

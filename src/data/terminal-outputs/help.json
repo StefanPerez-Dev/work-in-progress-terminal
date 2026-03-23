@@ -1,0 +1,41 @@
+[
+  { "type": "section", "content": "Available commands" },
+  { "type": "text", "content": "" },
+  {
+    "type": "help-item",
+    "content": {
+      "label": "install",
+      "command": "install",
+      "description": "Try installing the portfolio (recommended)",
+      "selected": false
+    }
+  },
+  {
+    "type": "help-item",
+    "content": {
+      "label": "about",
+      "command": "about",
+      "description": "About the developer",
+      "selected": false
+    }
+  },
+  {
+    "type": "help-item",
+    "content": {
+      "label": "contact",
+      "command": "contact",
+      "description": "Get in touch",
+      "selected": false
+    }
+  },
+  {
+    "type": "help-item",
+    "content": {
+      "label": "clear",
+      "command": "clear",
+      "description": "Clear the terminal",
+      "selected": false
+    }
+  }
+]
+
