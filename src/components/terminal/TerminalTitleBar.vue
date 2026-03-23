@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import avatarImage from '../../assets/avatar.png'
-import profileContent from '../../content/profile.json'
+import profileContent from '../../content/terminal/profile.json'
 </script>
 
 <template>

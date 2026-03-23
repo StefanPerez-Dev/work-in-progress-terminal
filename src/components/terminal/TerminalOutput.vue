@@ -1,5 +1,9 @@
 <script setup>
-import { ref } from 'vue'
+/**
+ * RULE 3: Components only render typed lines.
+ * Receives lines prop, no content decisions.
+ */
+import { useTemplateRef } from 'vue'
 import TerminalLine from './TerminalLine.vue'
 
 defineProps({
@@ -8,7 +12,7 @@ defineProps({
   prompt: { type: String, required: true },
 })
 const emit = defineEmits(['focus-request'])
-const outputRootEl = ref<HTMLElement | null>(null)
+const outputRootEl = useTemplateRef('outputRootEl')
 
 function onOutputClick() {
   emit('focus-request')

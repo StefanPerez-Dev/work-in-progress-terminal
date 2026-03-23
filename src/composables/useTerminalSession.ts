@@ -1,5 +1,5 @@
 import { ref, nextTick, onMounted } from 'vue'
-import { resolveCommand, getBootResponse, getHintContent, PROMPT } from '../terminalApi'
+import { resolveCommand, getBootResponse, getHintResponse, PROMPT } from '../api/terminalApi'
 import { useTerminalPlayer } from './useTerminalPlayer'
 
 type TerminalLine = {
@@ -13,7 +13,7 @@ type TerminalLine = {
 
 /**
  * Owns session state: lines, inputValue, booting, focus, queued commands.
- * Orchestrates boot, commands, and input. Uses useTerminalPlayer and terminalApi.
+ * Orchestrates boot, commands, and input. Always delegates to terminalApi for responses.
  */
 export function useTerminalSession() {
   const outputElRef = ref<HTMLElement | Record<string, unknown> | null>(null)
@@ -126,8 +126,7 @@ export function useTerminalSession() {
   }
 
   function onSubmit() {
-    const cmd = inputValue.value?.trim()
-    if (!cmd) return
+    const cmd = inputValue.value?.trim() ?? ''
     runCommand(cmd)
     inputValue.value = ''
     nextTick(focusInput)
@@ -150,22 +149,19 @@ export function useTerminalSession() {
     moveHelpSelection(event.key === 'ArrowDown' ? 'down' : 'up')
   }
 
-  function showHint() {
+  async function showHint() {
     if (hintShown.value) return
     hintShown.value = true
-    const { note, tipDesktop, tipMobile } = getHintContent()
     const isMobile = typeof window !== 'undefined' && Boolean(window.matchMedia?.('(max-width: 768px), (pointer: coarse)')?.matches)
-    addLine('text', '', { done: true, visibleLength: 1e6 })
-    addLine('note', note, { done: true, visibleLength: 1e6 })
-    addLine('tip', isMobile ? tipMobile : tipDesktop, { done: true, visibleLength: 1e6 })
-    scrollToBottom('auto')
+    const hint = getHintResponse(isMobile)
+    await playResponse(hint, { reducedMotion: reducedMotion.value })
   }
 
   async function initialize() {
     reducedMotion.value = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false
     const boot = getBootResponse()
     await playResponse(boot, { reducedMotion: reducedMotion.value })
-    showHint()
+    await showHint()
     booting.value = false
     const queued = queuedCommands.value.splice(0)
     queued.forEach(runCommand)

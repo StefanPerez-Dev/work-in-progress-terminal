@@ -1,4 +1,5 @@
 {
+  "$schema": "../responses.schema.json",
   "id": "about",
   "sequence": [
     { "kind": "echo-command", "value": "" },
@@ -9,19 +10,19 @@
         "lines": [
           "src/stefan-perez",
           "├── role",
-          "│   └── Front-end Developer",
+          "│   └── Senior Front-end Developer",
           "├── stack",
-          "│   ├── Vue",
-          "│   ├── React",
-          "│   └── TypeScript",
-          "│   └── NuxtJS",
-          "│   └── NextJS",
-          "│   └── ....",
-          "└── More Information",
-          "    └── see package.json"
-        ],
-        "linkText": "package.json",
-        "href": "/cv.pdf"
+          "│   ├── Vue, Nuxt",
+          "│   ├── React, Next",
+          "│   ├── TypeScript",
+          "│   ├── Performance Optimization",
+          "│   ├── Accessibility",
+          "│   ├── Mobile App Development",
+          "│   ├── CI/CD",
+          "│   ├── Testing (Playwright, Jest, Cypress)",
+          "│   └── ...",
+          "└── More soon..."
+        ]
       }
     }
   ]

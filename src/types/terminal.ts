@@ -1,6 +1,6 @@
 /**
- * Unified response shape for boot and command responses.
- * The player only knows one thing: play a response.
+ * Terminal domain types: responses, events, line types.
+ * The whole terminal contract lives here.
  */
 export type TerminalResponse = {
   id: string

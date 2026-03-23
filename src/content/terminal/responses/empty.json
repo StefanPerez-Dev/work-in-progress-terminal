@@ -1,4 +1,5 @@
 {
+  "$schema": "../responses.schema.json",
   "id": "empty",
   "sequence": [
     { "kind": "echo-command", "value": "" },

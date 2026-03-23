@@ -2,18 +2,24 @@
  * Mocks backend responses from JSON files.
  * Replace with real API calls when backend exists.
  *
- * All responses share the same shape: { id, sequence }.
+ * RULE 1: Every response comes from JSON through terminalApi.ts.
+ * All response JSON files share the same contract: { id, sequence }.
+ * See content/terminal/responses.schema.json for the schema.
+ *
+ * Only this module knows: raw input normalization, alias resolution,
+ * when empty/unknown/clear is returned, and which response file maps to which command.
  */
-import type { TerminalResponse, TerminalEvent } from './types/terminalResponse'
-import terminalConfig from './content/terminal/config.json'
-import bootResponse from './content/terminal/responses/boot.json'
-import helpResponse from './content/terminal/responses/help.json'
-import aboutResponse from './content/terminal/responses/about.json'
-import contactResponse from './content/terminal/responses/contact.json'
-import installResponse from './content/terminal/responses/install.json'
-import unknownResponse from './content/terminal/responses/unknown.json'
-import clearResponse from './content/terminal/responses/clear.json'
-import emptyResponse from './content/terminal/responses/empty.json'
+import type { TerminalResponse, TerminalEvent } from '../types/terminal'
+import terminalConfig from '../content/terminal/config.json'
+import bootResponse from '../content/terminal/responses/boot.json'
+import helpResponse from '../content/terminal/responses/help.json'
+import aboutResponse from '../content/terminal/responses/about.json'
+import contactResponse from '../content/terminal/responses/contact.json'
+import installResponse from '../content/terminal/responses/install.json'
+import unknownResponse from '../content/terminal/responses/unknown.json'
+import clearResponse from '../content/terminal/responses/clear.json'
+import emptyResponse from '../content/terminal/responses/empty.json'
+import hintResponse from '../content/terminal/responses/hint.json'
 
 function normalizeCommand(raw: string): string {
   return raw.trim().toLowerCase().replace(/\s+/g, ' ')
@@ -27,6 +33,16 @@ function isNpmInstall(cmd: string): boolean {
     n.startsWith('npm install stefan.perez ') ||
     n.startsWith('npm i stefan.perez ')
   )
+}
+
+/** Maps any raw input to a response id (empty, clear, help, install, unknown, etc.). */
+function getResponseKey(rawCommand: string): string {
+  const raw = (rawCommand || '').trim()
+  if (!raw) return 'empty'
+  const n = normalizeCommand(raw)
+  if (n === 'clear') return 'clear'
+  if (n === 'install' || isNpmInstall(raw)) return 'install'
+  return responses.has(n) ? n : 'unknown'
 }
 
 function clone<T>(obj: T): T {
@@ -60,6 +76,7 @@ const responses = new Map<string, ResponseShape>([
   ['unknown', unknownResponse as ResponseShape],
   ['clear', clearResponse as ResponseShape],
   ['empty', emptyResponse as ResponseShape],
+  ['hint', hintResponse as ResponseShape],
 ])
 
 function withCommand(raw: string, template: ResponseShape): TerminalResponse {
@@ -81,23 +98,22 @@ export function getBootResponse(): TerminalResponse {
 /** Resolve raw command to response (mocks backend). */
 export function resolveCommand(rawCommand: string): TerminalResponse {
   const raw = (rawCommand || '').trim()
-  if (!raw) return withCommand('', responses.get('empty')!)
-  const n = normalizeCommand(raw)
-  if (n === 'clear') return withCommand(raw, responses.get('clear')!)
-  const template = n === 'install' || isNpmInstall(raw)
-    ? responses.get('install')
-    : responses.get(n)
-  if (template) return withCommand(raw, template)
-  return withCommand(raw, responses.get('unknown')!)
+  const key = getResponseKey(rawCommand)
+  const template = responses.get(key)!
+  return withCommand(raw, template)
 }
 
-/** Hint content (note + tip) after boot. */
-export function getHintContent(): { note: string; tipDesktop: string; tipMobile: string } {
+/** Hint response shown after boot (note + tip). */
+export function getHintResponse(isMobile: boolean): TerminalResponse {
   const init = terminalConfig.init as { note?: string; tipDesktop?: string; tipMobile?: string }
-  return {
+  const vars = {
     note: init.note ?? '',
-    tipDesktop: init.tipDesktop ?? '',
-    tipMobile: init.tipMobile ?? '',
+    tip: isMobile ? (init.tipMobile ?? '') : (init.tipDesktop ?? ''),
+  }
+  const template = responses.get('hint')!
+  return {
+    id: template.id,
+    sequence: substituteInSequence(clone(template.sequence), vars),
   }
 }
 

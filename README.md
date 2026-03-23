@@ -51,22 +51,30 @@ On mobile, typing is replaced by a command chip bar to reduce friction:
 - output still renders as terminal command + response
 - terminal layout and aesthetic remain intact
 
+## Architecture Rules
+
+1. **Every response comes from JSON through terminalApi.ts** — No responses constructed in code. All flow from `content/terminal/responses/*.json`.
+2. **useTerminalPlayer only plays events, never decides behavior** — Pure playback. No API, no command logic.
+3. **Components only render typed lines** — Receive `lines` prop, no content decisions.
+
 ## Project Structure
 
 ```text
 src/
   components/
-    Terminal.vue
     terminal/
+      Terminal.vue
       TerminalTitleBar.vue
       TerminalOutput.vue
       TerminalInputLine.vue
       TerminalCommandBar.vue
       TerminalLine.vue
+      lines/
   composables/
     useTerminalSession.ts   # Session state + orchestration
     useTerminalPlayer.ts   # Sequence playback only
-  terminalApi.ts          # Mocks backend responses from JSON
+  api/
+    terminalApi.ts        # Mocks backend responses from JSON
   content/
     terminal/
       config.json         # prompt, init hints, mobile

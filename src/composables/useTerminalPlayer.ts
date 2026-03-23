@@ -1,4 +1,4 @@
-import type { TerminalEvent, TerminalResponse } from '../types/terminalResponse'
+import type { TerminalEvent, TerminalResponse } from '../types/terminal'
 import { LINE_STAGGER_MS } from '../constants/terminalBehavior'
 
 type PlayerDeps = {
@@ -12,8 +12,8 @@ type PlayerDeps = {
 export type PlayOptions = { reducedMotion?: boolean }
 
 /**
- * Only knows how to play a sequence: TerminalEvent[].
- * No state, no API — pure playback.
+ * RULE 2: useTerminalPlayer only plays events, never decides behavior.
+ * Pure playback. No API, no command logic, no output decisions.
  */
 export function useTerminalPlayer(deps: PlayerDeps) {
   const { addLine, outputLines, clearOutput, scrollToBottom, nextTick } = deps

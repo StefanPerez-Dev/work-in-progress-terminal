@@ -1,4 +1,5 @@
 {
+  "$schema": "../responses.schema.json",
   "id": "boot",
   "sequence": [
     { "kind": "line", "lineType": "system", "content": "Initializing portfolio environment..." },

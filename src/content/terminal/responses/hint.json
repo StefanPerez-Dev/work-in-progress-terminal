@@ -1,0 +1,9 @@
+{
+  "$schema": "../responses.schema.json",
+  "id": "hint",
+  "sequence": [
+    { "kind": "line", "lineType": "text", "content": "" },
+    { "kind": "line", "lineType": "note", "content": "{{note}}" },
+    { "kind": "line", "lineType": "tip", "content": "{{tip}}" }
+  ]
+}

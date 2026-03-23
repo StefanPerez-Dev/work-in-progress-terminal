@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useTerminalSession } from '../composables/useTerminalSession'
-import terminalConfig from '../content/terminal/config.json'
-import TerminalTitleBar from './terminal/TerminalTitleBar.vue'
-import TerminalOutput from './terminal/TerminalOutput.vue'
-import TerminalInputLine from './terminal/TerminalInputLine.vue'
-import TerminalCommandBar from './terminal/TerminalCommandBar.vue'
+import { useTerminalSession } from '../../composables/useTerminalSession'
+import terminalConfig from '../../content/terminal/config.json'
+import TerminalTitleBar from './TerminalTitleBar.vue'
+import TerminalOutput from './TerminalOutput.vue'
+import TerminalInputLine from './TerminalInputLine.vue'
+import TerminalCommandBar from './TerminalCommandBar.vue'
 
 const {
   lines,
