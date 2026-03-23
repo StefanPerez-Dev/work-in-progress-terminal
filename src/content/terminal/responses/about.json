@@ -1,23 +1,28 @@
-[
-  {
-    "type": "about-tree",
-    "content": {
-      "lines": [
-        "src/stefan-perez",
-        "├── role",
-        "│   └── Front-end Developer",
-        "├── stack",
-        "│   ├── Vue",
-        "│   ├── React",
-        "│   └── TypeScript",
-        "│   └── NuxtJS",
-        "│   └── NextJS",
-        "│   └── ....",
-        "└── More Information",
-        "    └── see package.json"
-      ],
-      "linkText": "package.json",
-      "href": "/cv.pdf"
+{
+  "id": "about",
+  "sequence": [
+    { "kind": "echo-command", "value": "" },
+    {
+      "kind": "line",
+      "lineType": "about-tree",
+      "content": {
+        "lines": [
+          "src/stefan-perez",
+          "├── role",
+          "│   └── Front-end Developer",
+          "├── stack",
+          "│   ├── Vue",
+          "│   ├── React",
+          "│   └── TypeScript",
+          "│   └── NuxtJS",
+          "│   └── NextJS",
+          "│   └── ....",
+          "└── More Information",
+          "    └── see package.json"
+        ],
+        "linkText": "package.json",
+        "href": "/cv.pdf"
+      }
     }
-  }
-]
+  ]
+}

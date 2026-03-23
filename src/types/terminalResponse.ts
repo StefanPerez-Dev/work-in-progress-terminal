@@ -1,9 +1,9 @@
 /**
- * Response payload for a terminal command.
- * The frontend plays the sequence without command-specific branching.
+ * Unified response shape for boot and command responses.
+ * The player only knows one thing: play a response.
  */
 export type TerminalResponse = {
-  command: string
+  id: string
   sequence: TerminalEvent[]
 }
 

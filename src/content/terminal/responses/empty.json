@@ -1,0 +1,7 @@
+{
+  "id": "empty",
+  "sequence": [
+    { "kind": "echo-command", "value": "" },
+    { "kind": "line", "lineType": "muted", "content": "" }
+  ]
+}

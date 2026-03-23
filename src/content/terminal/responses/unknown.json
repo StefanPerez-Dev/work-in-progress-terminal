@@ -1,0 +1,8 @@
+{
+  "id": "unknown",
+  "sequence": [
+    { "kind": "echo-command", "value": "" },
+    { "kind": "line", "lineType": "error", "content": "command not found: {{command}}" },
+    { "kind": "line", "lineType": "muted", "content": "{{tipDesktop}}" }
+  ]
+}

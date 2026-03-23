@@ -1,4 +1,4 @@
-import type { TerminalEvent } from '../types/terminalResponse'
+import type { TerminalEvent, TerminalResponse } from '../types/terminalResponse'
 import { LINE_STAGGER_MS } from '../constants/terminalBehavior'
 
 type PlayerDeps = {
@@ -82,13 +82,13 @@ export function useTerminalPlayer(deps: PlayerDeps) {
     }
   }
 
-  async function playSequence(sequence: TerminalEvent[], opts?: PlayOptions): Promise<void> {
-    for (const event of sequence) await playEvent(event, opts)
+  async function playResponse(response: TerminalResponse, opts?: PlayOptions): Promise<void> {
+    for (const event of response.sequence) await playEvent(event, opts)
     const r = nextTick()
     if (r && typeof (r as Promise<unknown>).then === 'function') await (r as Promise<void>)
     settleScroll()
     requestAnimationFrame?.(() => requestAnimationFrame?.(settleScroll))
   }
 
-  return { playSequence }
+  return { playResponse }
 }

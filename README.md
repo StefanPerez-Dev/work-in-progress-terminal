@@ -70,8 +70,7 @@ src/
   content/
     terminal/
       config.json         # prompt, init hints, mobile
-      boot.json           # boot sequence
-      responses/          # about, contact, help, install
+      responses/          # boot, about, contact, help, install, unknown, clear, empty
 ```
 
 ## Content-Driven Setup

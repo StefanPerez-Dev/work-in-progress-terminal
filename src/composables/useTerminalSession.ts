@@ -1,5 +1,5 @@
 import { ref, nextTick, onMounted } from 'vue'
-import { resolveCommand, getBootSequence, getHintContent, PROMPT } from '../terminalApi'
+import { resolveCommand, getBootResponse, getHintContent, PROMPT } from '../terminalApi'
 import { useTerminalPlayer } from './useTerminalPlayer'
 
 type TerminalLine = {
@@ -79,7 +79,7 @@ export function useTerminalSession() {
     nextTick(scrollToBottom)
   }
 
-  const { playSequence } = useTerminalPlayer({
+  const { playResponse } = useTerminalPlayer({
     addLine,
     outputLines: lines,
     clearOutput,
@@ -121,7 +121,7 @@ export function useTerminalSession() {
     }
     commandQueue = commandQueue.then(async () => {
       const response = resolveCommand(cmd)
-      await playSequence(response.sequence, { reducedMotion: reducedMotion.value })
+      await playResponse(response, { reducedMotion: reducedMotion.value })
     })
   }
 
@@ -163,8 +163,8 @@ export function useTerminalSession() {
 
   async function initialize() {
     reducedMotion.value = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false
-    const boot = getBootSequence()
-    await playSequence(boot, { reducedMotion: reducedMotion.value })
+    const boot = getBootResponse()
+    await playResponse(boot, { reducedMotion: reducedMotion.value })
     showHint()
     booting.value = false
     const queued = queuedCommands.value.splice(0)

@@ -1,0 +1,7 @@
+{
+  "id": "clear",
+  "sequence": [
+    { "kind": "echo-command", "value": "{{command}}" },
+    { "kind": "clear" }
+  ]
+}
