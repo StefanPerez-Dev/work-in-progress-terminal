@@ -1,21 +1,23 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useTerminal } from '../composables/useTerminal'
-import terminalContent from '../content/terminal.json'
+import { useTerminalSession } from '../composables/useTerminalSession'
+import terminalConfig from '../content/terminal/config.json'
 import TerminalTitleBar from './terminal/TerminalTitleBar.vue'
 import TerminalOutput from './terminal/TerminalOutput.vue'
 import TerminalInputLine from './terminal/TerminalInputLine.vue'
 import TerminalCommandBar from './terminal/TerminalCommandBar.vue'
 
 const {
+  lines,
   inputValue,
-  outputLines,
+  inputLineRef,
+  outputEl,
   getRenderedContent,
   onSubmit,
   onKey,
   runCommand,
   PROMPT,
-} = useTerminal()
+} = useTerminalSession()
 
 const isInputFocused = ref(false)
 const isMobileDevice = ref(false)
@@ -61,7 +63,7 @@ onUnmounted(() => {
         <TerminalTitleBar />
         <TerminalOutput
           ref="outputEl"
-          :lines="outputLines"
+          :lines="lines"
           :get-rendered-content="getRenderedContent"
           :prompt="PROMPT"/>
         <TerminalInputLine
@@ -74,16 +76,16 @@ onUnmounted(() => {
           @focus="onInputFocus" />
         <TerminalCommandBar
           v-else
-          :commands="[...terminalContent.mobile.commands]"
-          :hint="terminalContent.mobile.hint"
-          :ariaLabel="terminalContent.mobile.ariaLabel"
+          :commands="[...terminalConfig.mobile.commands]"
+          :hint="terminalConfig.mobile.hint"
+          :ariaLabel="terminalConfig.mobile.ariaLabel"
           @run="runCommand"
         />
       </div>
     </div>
 
     <p class="sr-only">
-      {{ terminalContent.srOnlyHint }}
+      {{ terminalConfig.srOnlyHint }}
     </p>
   </div>
 </template>

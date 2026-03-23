@@ -2,12 +2,6 @@
   "prompt": "visitor@portfolio:~$ ",
   "srOnlyHint": "Terminal. On desktop, type help and press Enter to see commands. On mobile, tap commands below. Try npm install stefan.perez for the main interaction.",
   "init": {
-    "steps": [
-      "Initializing portfolio environment...",
-      "Resolving dependencies...",
-      "Starting dev server..."
-    ],
-    "ready": "✔ Environment ready",
     "note": "Note: My portfolio is still under construction...",
     "tipDesktop": "Tip: Try \"install\" or type \"help\".",
     "tipMobile": "Tip: Tap a command below to explore."
@@ -18,4 +12,3 @@
     "ariaLabel": "Quick commands"
   }
 }
-

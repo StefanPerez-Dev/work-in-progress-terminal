@@ -1,0 +1,9 @@
+[
+  { "kind": "line", "lineType": "system", "content": "Initializing portfolio environment..." },
+  { "kind": "spinner", "durationMs": 520 },
+  { "kind": "line", "lineType": "system", "content": "Resolving dependencies..." },
+  { "kind": "spinner", "durationMs": 520 },
+  { "kind": "line", "lineType": "system", "content": "Starting dev server..." },
+  { "kind": "spinner", "durationMs": 520 },
+  { "kind": "line", "lineType": "success", "content": "✔ Environment ready" }
+]

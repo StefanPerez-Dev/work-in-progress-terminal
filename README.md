@@ -64,16 +64,14 @@ src/
       TerminalCommandBar.vue
       TerminalLine.vue
   composables/
-    useTerminal.ts
-    useTerminalInit.ts
-    useTerminalCommands.ts
-    useTerminalOutput.ts
+    useTerminalSession.ts   # Session state + orchestration
+    useTerminalPlayer.ts   # Sequence playback only
+  terminalApi.ts          # Mocks backend responses from JSON
   content/
-    profile.ts
-    contact.ts
-    terminal.ts
-  constants/
-    terminalBehavior.ts
+    terminal/
+      config.json         # prompt, init hints, mobile
+      boot.json           # boot sequence
+      responses/          # about, contact, help, install
 ```
 
 ## Content-Driven Setup
